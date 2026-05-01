@@ -10,7 +10,7 @@ This is three-in-one repo that provide the my source code for
 
 ## Conda Environment
 ```bash
-conda env create -n heiwa4h python==3.12.2 biopython==1.84 matplotlib==3.9.2 numpy==1.26.4 modeller==10.8 pandas==2.2.3 scikit-learn==1.8.0 scipy==1.14.1 umap-learn==0.5.12
+conda create -n heiwa4h python==3.12.2 biopython==1.84 matplotlib==3.9.2 numpy==1.26.4 modeller==10.8 pandas==2.2.3 scikit-learn==1.8.0 scipy==1.14.1 umap-learn==0.5.12
 conda activate heiwa4h
 conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 pytorch-cuda=12.4 -c pytorch -c nvidia
 conda install tqdm==4.67.1 esm==3.2.0
