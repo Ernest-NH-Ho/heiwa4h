@@ -32,7 +32,7 @@ source /usr/local/gromacs/bin/GMXRC
 | `temp_end` | Final temperature in Kelvin scale |
 
 ## Prepare your script
-For most users, all configurations can be edited in ```run_gmx.py``` at the python dictionary ```components```.
+For most users, all configurations can be edited inside the python dictionary ```component``` in ```run_gmx.py```.
 
 ## Run
 ```bash

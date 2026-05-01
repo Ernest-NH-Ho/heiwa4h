@@ -22,7 +22,7 @@ Download and install DSSP from the official releases:
 Transfer the model weights from ```1_model_dev``` to this directory.
 ```bash
 for part in ExposedResiduePrediction HEIWA_Hybridizer HEIWA_Imp TIM; do
-    mv ../1_model_dev/HEIWA_SelfGate_rot1_angAtten1_exhd4_Imp_newSASAgateSoft/esm3_SelfGate_bs64_dr1_3_v192_v_compress0.8_Imp_hd4/${part}_epoch_12_model.pth.gz heiwa/${part}_epoch_final_model.pth.gz
+    cp ../1_model_dev/HEIWA_SelfGate_rot1_angAtten1_exhd4_Imp_newSASAgateSoft/esm3_SelfGate_bs64_dr1_3_v192_v_compress0.8_Imp_hd4/${part}_epoch_12_model.pth.gz heiwa/${part}_epoch_final_model.pth.gz
 done
 ```
 
@@ -44,6 +44,7 @@ The CSV file must contain the following fields:
 | `Length_final` | Length of the sequence in `Sequence_final` |
 | `DSSP_start` | Position of the first residue of `Sequence_final` in PDB (0 if sequences are identical, must be ≥ 0) |
 | `Act_bind_motif_sites` | Critical residues in `Sequence_final` (first residue has index 1) |
+| `Filename` | File name of your protein dssp file, excluding the suffix **.dssp** |
 
 **Important Notes:**
 - Make sure each sequence ID is unique in the csv
@@ -51,7 +52,7 @@ The CSV file must contain the following fields:
 - Make sure CSV sequences are identical to PDB sequences after accounting for the shifts in "DSSP_start"
 
 ## Prepare your script
-Most, if not all, configuration can be done by editing ```modules/config.py```
+For most users, most, if not all, configuration can be done by editing ```modules/config.py```
 You may like to 
 - Set the number of CPU at ```self.NUM_CPU```
 - Set the location of your DSSP file at ```self.DSSP_DIR```
