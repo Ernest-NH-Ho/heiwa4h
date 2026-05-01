@@ -9,6 +9,7 @@ The training script was designed to be adaptible to various supervised learning 
 - W0 encodes the weight for each sample, which accounts for the composition bias of your dataset.
 - If the sum of W0 of all positive and negative samples differs significant, you should define Wp (weight for positive samples) and Wn (weight for negative samples) for balancing the binary cross entropy loss (see ```modules/functions/loss.py```).
 - M tensors contains boolean mask for padded positions. L tensors contains the sequence length for each sample in X.
+- Currently, only X data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression. Instead, we provided the original ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```. Obtaining the AlphaFold
 
 ## Prepare your script
 
@@ -31,4 +32,4 @@ python train_run.py -head 4
 python inference_run.py -save_intermediate_layer 1 -head 4
 ```
 
-Currently, only data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression.
+The expected outputs from training and inference runs are included in ```models/HEIWA_SelfGate_rot1_angAtten1_exhd4_Imp_newSASAgateSoft/esm3_SelfGate_bs64_dr1_3_v192_v_compress0.8_Imp_hd4/```

@@ -1,0 +1,81 @@
+TIM
+ffn11.weight	torch.Size([6, 1536])	9216
+ffn11.bias	torch.Size([6])	6
+ffn12.weight	torch.Size([6, 1536])	9216
+ffn12.bias	torch.Size([6])	6
+ffn2.weight	torch.Size([1, 6])	6
+ffn2.bias	torch.Size([1])	1
+
+ExposedResiduePrediction
+swish.ffn.weight	torch.Size([1024, 1536])	1572864
+swish.ffn.bias	torch.Size([1024])	1024
+swish.gate.weight	torch.Size([1024, 1536])	1572864
+swish.gate.bias	torch.Size([1024])	1024
+ffn.weight	torch.Size([1, 1024])	1024
+ffn.bias	torch.Size([1])	1
+
+HEIWA_Imp
+parts.Water3P_Implicit.raw_emb	torch.Size([640])	640
+parts.Water3P_Implicit.angle_bias	torch.Size([4])	4
+parts.Water3P_Implicit.K_H.weight	torch.Size([128, 640])	81920
+parts.Water3P_Implicit.K_H.bias	torch.Size([128])	128
+parts.Water3P_Implicit.K_L.weight	torch.Size([128, 640])	81920
+parts.Water3P_Implicit.K_L.bias	torch.Size([128])	128
+parts.Water3P_Implicit.K_O.weight	torch.Size([128, 640])	81920
+parts.Water3P_Implicit.K_O.bias	torch.Size([128])	128
+parts.Water3P_Implicit.K_L2.weight	torch.Size([128, 640])	81920
+parts.Water3P_Implicit.K_L2.bias	torch.Size([128])	128
+parts.Water3P_Implicit.Ka_H.weight	torch.Size([3, 640])	1920
+parts.Water3P_Implicit.Ka_H.bias	torch.Size([3])	3
+parts.Water3P_Implicit.Ka_L.weight	torch.Size([3, 640])	1920
+parts.Water3P_Implicit.Ka_L.bias	torch.Size([3])	3
+parts.Water3P_Implicit.Ka_O.weight	torch.Size([3, 640])	1920
+parts.Water3P_Implicit.Ka_O.bias	torch.Size([3])	3
+parts.Water3P_Implicit.Ka_L2.weight	torch.Size([3, 640])	1920
+parts.Water3P_Implicit.Ka_L2.bias	torch.Size([3])	3
+parts.Water3P_Implicit.V_H.weight	torch.Size([192, 640])	122880
+parts.Water3P_Implicit.V_H.bias	torch.Size([192])	192
+parts.Water3P_Implicit.V_L.weight	torch.Size([192, 640])	122880
+parts.Water3P_Implicit.V_L.bias	torch.Size([192])	192
+parts.Water3P_Implicit.V_O.weight	torch.Size([192, 640])	122880
+parts.Water3P_Implicit.V_O.bias	torch.Size([192])	192
+parts.Water3P_Implicit.V_L2.weight	torch.Size([192, 640])	122880
+parts.Water3P_Implicit.V_L2.bias	torch.Size([192])	192
+parts.Protein.Qp.weight	torch.Size([1536, 1536])	2359296
+parts.Protein.Qp.bias	torch.Size([1536])	1536
+parts.Protein.Rp.weight	torch.Size([108, 1536])	165888
+parts.Protein.Rp.bias	torch.Size([108])	108
+parts.Protein.Qp_a.weight	torch.Size([36, 1536])	55296
+parts.Protein.Qp_a.bias	torch.Size([36])	36
+parts.Protein.Qp_a_bias.weight	torch.Size([12, 1536])	18432
+parts.Protein.Qp_a_bias.bias	torch.Size([12])	12
+rmsn_relu.weight	torch.Size([2304])	2304
+
+HEIWA_Hybridizer
+Wo_w.ffn.weight	torch.Size([1843, 2304])	4246272
+Wo_w.ffn.bias	torch.Size([1843])	1843
+Wo_w.gate.weight	torch.Size([1843, 2304])	4246272
+Wo_w.gate.bias	torch.Size([1843])	1843
+out_proj.ffn_proj.weight	torch.Size([6144, 1843])	11323392
+out_proj.ffn_proj.bias	torch.Size([6144])	6144
+out_proj.gate_proj.weight	torch.Size([6144, 1843])	11323392
+out_proj.gate_proj.bias	torch.Size([6144])	6144
+out_proj.down_proj.weight	torch.Size([1536, 6144])	9437184
+out_proj.down_proj.bias	torch.Size([1536])	1536
+out_proj.layer_norm1.weight	torch.Size([1843])	1843
+out_proj.layer_norm1.bias	torch.Size([1843])	1843
+out_proj.layer_norm2.weight	torch.Size([1536])	1536
+out_proj.layer_norm2.bias	torch.Size([1536])	1536
+out_proj.residual_proj.weight	torch.Size([1536, 1843])	2830848
+out_proj.residual_proj.bias	torch.Size([1536])	1536
+
+Thermo
+swish1.ffn.weight	torch.Size([96, 1536])	147456
+swish1.ffn.bias	torch.Size([96])	96
+swish1.gate.weight	torch.Size([96, 1536])	147456
+swish1.gate.bias	torch.Size([96])	96
+swish2.ffn.weight	torch.Size([1, 96])	96
+swish2.ffn.bias	torch.Size([1])	1
+swish2.gate.weight	torch.Size([1, 96])	96
+swish2.gate.bias	torch.Size([1])	1
+
