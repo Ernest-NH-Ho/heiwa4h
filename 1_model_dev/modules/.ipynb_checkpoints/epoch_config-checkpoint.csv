@@ -1,0 +1,11 @@
+task,train,valid,test,inference,fisher
+with_gradient,1,0,0,0,1
+with_dropout,1,0,0,0,0
+calc_loss,1,1,1,0,1
+calc_metrics,1,1,1,0,0
+backpropagation,1,0,0,0,0
+save_fisher,0,0,0,0,1
+save_pred,0,0,0,1,0
+return_loss,1,1,1,0,0
+return_metric,1,1,1,0,0
+return_dropout,1,0,0,0,0
