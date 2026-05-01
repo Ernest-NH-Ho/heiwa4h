@@ -10,6 +10,18 @@ The training script was designed to be adaptible to various supervised learning 
 - If the sum of W0 of all positive and negative samples differs significant, you should define Wp (weight for positive samples) and Wn (weight for negative samples) for balancing the binary cross entropy loss (see ```modules/functions/loss.py```).
 - M tensors contains boolean mask for padded positions. L tensors contains the sequence length for each sample in X.
 
+## For reviewers' data regeneration
+Currently, only X data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression. Instead, we provided the original ```2_esm3_with_heiwa/inpout_csv/uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```. 
+We attached all the dssp files inside ```2_esm3_with_heiwa/original_dataset_dssp/```. Please follow the instructions ```2_esm3_with_heiwa/README.md``` to regenerate all embeddings to create all X_tensors. With heiwa set to 0, the running command should be
+```bash
+python generate_proteins.py -heiwa 0
+```
+
+Finally, one can synthesize all embeddings into one tensor (size = n * max_seq_len * 1536). n is the size of the dataset ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```.
+
+***Note 1***: when doing the train-valid-test split, max_seq_len is 1024, 1017, and 1021 in ```X_train.pt```, ```X_valid.pt```, and ```X_test.pt```, respectively.
+***Note 2***: remember to exclude the CLS and EOS tokens from the dataset.
+
 ## Prepare your script
 
 This script is designed to be easily manipulated by only modifying three python scripts ```model.py```, ```parameters.py``` and ```hp_tuning.py```, plus two csv files in your data folder.
@@ -32,5 +44,3 @@ python inference_run.py -save_intermediate_layer 1 -head 4
 ```
 
 The expected outputs from training and inference runs are included in ```models/HEIWA_SelfGate_rot1_angAtten1_exhd4_Imp_newSASAgateSoft/esm3_SelfGate_bs64_dr1_3_v192_v_compress0.8_Imp_hd4/```
-
-Currently, only X data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression. Instead, we provided the original ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```. Obtaining the AlphaFold

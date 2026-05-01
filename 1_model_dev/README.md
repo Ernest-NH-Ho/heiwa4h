@@ -9,7 +9,18 @@ The training script was designed to be adaptible to various supervised learning 
 - W0 encodes the weight for each sample, which accounts for the composition bias of your dataset.
 - If the sum of W0 of all positive and negative samples differs significant, you should define Wp (weight for positive samples) and Wn (weight for negative samples) for balancing the binary cross entropy loss (see ```modules/functions/loss.py```).
 - M tensors contains boolean mask for padded positions. L tensors contains the sequence length for each sample in X.
-- Currently, only X data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression. Instead, we provided the original ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```. Obtaining the AlphaFold
+
+## For reviewers' data regeneration
+Currently, only X data for inference were provided as the X tensors for train, validation, and test are each over 4 Gb after compression. Instead, we provided the original ```2_esm3_with_heiwa/inpout_csv/uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```. 
+We attached all the dssp files inside ```2_esm3_with_heiwa/original_dataset_dssp/```. Please follow the instructions ```2_esm3_with_heiwa/README.md``` to regenerate all embeddings to create all X_tensors. With heiwa set to 0, the running command should be
+```bash
+python generate_proteins.py -heiwa 0
+```
+
+Finally, one can synthesize all embeddings into one tensor (size = n * max_seq_len * 1536). n is the size of the dataset ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```.
+
+***Note 1***: when doing the train-valid-test split, max_seq_len is 1024, 1017, and 1021 in ```X_train.pt```, ```X_valid.pt```, and ```X_test.pt```, respectively.
+***Note 2***: remember to exclude the CLS and EOS tokens from the dataset.
 
 ## Prepare your script
 
