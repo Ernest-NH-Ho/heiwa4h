@@ -3,7 +3,10 @@ Hybrid Explicit-Implicit Water Attention (HEIWA) is a correction to the forcefie
 Time-averaged protein-solvent interactions were encoded as static embedding that can be used to modify the SE(3)-embedding of ESM3 via an all-to-all attention-based message passing.
 
 ## Purpose of repo
-This is three-in-one repo that provide the code for 1. HEIWA model training using a proxy thermophilic protein classification task, 2. ESM3 protein generation with HEIWA, and 3. molecular dynamic simulations.
+This is three-in-one repo that provide the my source code for
+1. HEIWA model training using a proxy thermophilic protein classification task
+2. ESM3 protein generation with HEIWA
+3. Molecular dynamic simulations
 
 ## Conda Environment
 - biopython==1.84

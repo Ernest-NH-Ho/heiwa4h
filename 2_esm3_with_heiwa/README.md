@@ -1,14 +1,14 @@
 ## Purpose
 
-Generate de novo proteins using ESM3
+Generate de novo proteins using ESM3 with/without HEIWA add-in.
 
 ## Installation
-### Install DSSP
+### Step 1: Install DSSP
 
 Download and install DSSP from the official releases:
 - https://github.com/cmbi/dssp/releases
 
-### Install ESM3
+### Step 2: Install ESM3
 1. Obtain the ESM3 model using the official public license from HuggingFace:
 - Visit: https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1
 - Follow the licensing requirements and download instructions
@@ -28,12 +28,13 @@ done
 
 ## Prepare your data
 
-### Input File Preparation
+### DSSP File Preparation
 
-1. **DSSP Files**: Place input DSSP files in the `data/` directory
-2. **CSV Files**: Place input CSV files (in UniProt format) in the `input_csv/` directory
+Place input DSSP files in the `data/` directory
 
-#### Required CSV Fields
+### CSV File Preparation
+Place input CSV files in the `input_csv/` directory
+
 The CSV file must contain the following fields:
 
 | Field | Description |
@@ -53,6 +54,7 @@ The CSV file must contain the following fields:
 Most, if not all, configuration can be done by editing ```modules/config.py```
 You may like to 
 - Set the number of CPU at ```self.NUM_CPU```
+- Set the location of your DSSP file at ```self.DSSP_DIR```
 - Set the location of your csv file at ```self.CSV_PATH```
 - Set the output folder name ```self.DATASET_NAME```. As such your embedding and protein objects would be saved in ```esm3_embeddings/DATASET_NAME``` and ```esm3_proteins/DATASET_NAME```.
 
