@@ -21,7 +21,7 @@ python generate_proteins.py -heiwa 0
 The X tensors can be synthesized by concatenation of all embeddings using right padding into one tensor. The size of tensor would be **n * max_seq_len * 1536** where n is the size of the dataset ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```.
 
 - ***Note 1***: max_seq_len is 1024, 1017, and 1021 for ```X_train.pt```, ```X_valid.pt```, and ```X_test.pt```, respectively.
-- ***Note 2***: remember to exclude the CLS and EOS tokens from each embedding [size = **(seq_len+2)** x 1536} by slicing ```tensor[1:-1, ...]```.
+- ***Note 2***: remember to exclude the CLS and EOS tokens from each embedding [size = **(seq_len+2)** x 1536] by slicing ```tensor[1:-1, ...]```.
 
 ## Prepare your script
 
