@@ -49,7 +49,7 @@ The CSV file must contain the following fields:
 **Important Notes:**
 - Make sure each sequence ID is unique in the csv
 - Do not include sequences over 1,650 amino acids for ESM3 input if you are running on a single RTX 3090ti.
-- Make sure CSV sequences are identical to PDB sequences after accounting for the shifts in "DSSP_start"
+- Make sure CSV sequences are identical to PDB sequences after accounting for the shifts in ```DSSP_start```
 
 ## Prepare your script
 For most users, most, if not all, configuration can be done by editing ```modules/config.py```
