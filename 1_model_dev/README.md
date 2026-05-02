@@ -11,15 +11,17 @@ The training script was designed to be adaptible to various supervised learning 
 - M tensors contains boolean mask for padded positions. L tensors contains the sequence length for each sample in X.
 
 ## For the regeneration of X tensors
-Currently, only X data for inference were provided as the ```X_train.pt```, ```X_valid.ot```, and ```X_test.pt``` are each over 4 Gb after compression. Instead, we provide the original ```2_esm3_with_heiwa/input_csv/uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv``` and all source dssp files inside ```2_esm3_with_heiwa/original_dataset_dssp/```. Please follow the instructions in ```2_esm3_with_heiwa/README.md``` to regenerate all embeddings to make all X_tensors via concatenation. The running command should be
+Currently, only X data for inference were provided as the ```X_train.pt```, ```X_valid.ot```, and ```X_test.pt``` are each over 4 Gb after compression. 
+Users/reviewers can reproduce our results by running ```inference_run.py``` directly.
+But to reproduce our training results, we provide the original ```2_esm3_with_heiwa/input_csv/uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv``` and all source dssp files inside ```2_esm3_with_heiwa/original_dataset_dssp/```. Please follow the instructions in ```2_esm3_with_heiwa/README.md``` to regenerate all embeddings to make all X_tensors via concatenation. The running command should be
 ```bash
 python generate_proteins.py -heiwa 0
 ```
 
-Finally, one can concatenate all embeddings using right padding into one tensor. The size of tensor would be **n * max_seq_len * 1536** where n is the size of the dataset ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```.
+The X tensors can be synthesized by concatenation of all embeddings using right padding into one tensor. The size of tensor would be **n * max_seq_len * 1536** where n is the size of the dataset ```uniprotkb_length_40_TO_1024_AND_reviewe_2026_03_07_xDupe_sf5_15_split.csv```.
 
 - ***Note 1***: max_seq_len is 1024, 1017, and 1021 for ```X_train.pt```, ```X_valid.pt```, and ```X_test.pt```, respectively.
-- ***Note 2***: remember to exclude the CLS and EOS tokens from each embedding by slicing ```tensor[1:-1, ...]```.
+- ***Note 2***: remember to exclude the CLS and EOS tokens from each embedding [size = **(seq_len+2)** x 1536} by slicing ```tensor[1:-1, ...]```.
 
 ## Prepare your script
 
