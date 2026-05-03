@@ -280,6 +280,7 @@ class GromacsRunner:
             "Potential": "Potential", 
             "Kinetic-En.": "KE", 
             "Pressure": "Pressure", 
+            # "Total-Energy": "TotEnergy"
         }
         tpr_name=f"nvt{i}_{temp}K"
         for target in ["Temperature", "Potential", "Kinetic-En.", "Pressure"]:
@@ -293,8 +294,9 @@ class GromacsRunner:
             "rmsf": "'C-alpha\n'", 
             "rms": "'C-alpha\nC-alpha\n'", 
             "gyrate": "'\"C-alpha\"\n'", 
+            "density": "SOL", 
         }
-        for target in ["rmsf", "rms", "gyrate",]:
+        for target in ["rmsf", "rms", "gyrate", "density"]:
             if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg"):
                 print(f"Calculating {target} for NVT...")
                 cmd = f"printf {d[target]} | gmx {target} -f {tpr_name}.trr -s {tpr_name}.tpr -o {tpr_name}_{target}.xvg"
@@ -308,7 +310,7 @@ class GromacsRunner:
         gro_filename = f"nvt{i}_{temp}K"
         return gro_filename, top_filename
     
-    def _run_npt_equilibration(self, folder_path, gro_filename, top_filename, temp, i=0):
+    def _run_npt_equilibration(self, folder_path, gro_filename, top_filename, temp):
         """
         Run NPT equilibration (constant N, P, T).
         
@@ -317,7 +319,7 @@ class GromacsRunner:
             temp: Temperature in Kelvin
         """
         print(f"\n{'='*60}")
-        print(f"NPT EQUILIBRATION {i} (T = {temp} K, P = 1 bar) for {folder_path}")
+        print(f"NPT EQUILIBRATION (T = {temp} K, P = 1 bar) for {folder_path}")
         print(f"{'='*60}\n")
 
         # Generate posres.itp
@@ -334,11 +336,11 @@ class GromacsRunner:
         # Create a list of descending fc list
         all_f_const = sorted(self.npt_scheme)
         all_f_const.reverse()
-        if i < self.em_nvt_iter:
-            all_f_const = all_f_const[:1]
+        # if i < self.em_nvt_iter:
+        # all_f_const = all_f_const[:1]
 
         ## =============== Sequential NPT starts here ============
-        top_filename = f"{top_filename}_npt{i}"
+        top_filename = f"{top_filename}_npt"
         for f_const in all_f_const:
             # Copy the correct posre.itp
             print(f"Copy the posre_fc{f_const}.itp to the running directory")
@@ -348,15 +350,15 @@ class GromacsRunner:
             )
             
             # Generate npt.tpr
-            if not os.path.exists(f"{folder_path}/npt{i}_{temp}K_fc{f_const}.tpr"):
+            if not os.path.exists(f"{folder_path}/npt_{temp}K_fc{f_const}.tpr"):
                 cmd = (f"gmx grompp -f npt_{temp}K_fc{f_const}.mdp -c {gro_filename}.gro "
                        f"-r {gro_filename}.gro -t {gro_filename}.cpt -p topol.top "
-                       f"-o npt{i}_{temp}K_fc{f_const}.tpr -maxwarn 2")
+                       f"-o npt_{temp}K_fc{f_const}.tpr -maxwarn 2")
                 self._run_command(cmd, cwd=folder_path)
 
-            if not os.path.exists(f"{folder_path}/npt{i}_{temp}K_fc{f_const}.gro"):
+            if not os.path.exists(f"{folder_path}/npt_{temp}K_fc{f_const}.gro"):
                 # Run NPT
-                cmd = f"gmx mdrun -v -deffnm npt{i}_{temp}K_fc{f_const} -nt {self.n_threads} -nb gpu"
+                cmd = f"gmx mdrun -v -deffnm npt_{temp}K_fc{f_const} -nt {self.n_threads} -nb gpu"
                 print(f"***** Running NPT equilibration for fc = {f_const} ... *****")
                 self._run_command(cmd, cwd=folder_path)
                 self._rename_and_remove_topol(folder_path=folder_path, new_topol_name=f"{top_filename}_fc{f_const}")
@@ -367,10 +369,11 @@ class GromacsRunner:
                 "Potential": "Potential", 
                 "Kinetic-En.": "KE", 
                 "Pressure": "Pressure", 
+                # "Total-Energy": "TotEnergy"
             }
-            tpr_name=f"npt{i}_{temp}K_fc{f_const}"
+            tpr_name=f"npt_{temp}K_fc{f_const}"
             for target in ["Temperature", "Potential", "Kinetic-En.", "Pressure"]:
-                if not os.path.exists(f"{folder_path}/npt{i}_{temp}K_fc{f_const}_{d[target].lower()}.xvg"):
+                if not os.path.exists(f"{folder_path}/npt_{temp}K_fc{f_const}_{d[target].lower()}.xvg"):
                     print(f"Calculating {target} for relaxation MD...")
                     cmd = f"printf '{target}\n' | gmx energy -f {tpr_name}.edr -o {tpr_name}_{d[target].lower()}.xvg"
                     self._run_command(cmd, cwd=folder_path)
@@ -380,8 +383,9 @@ class GromacsRunner:
                 "rmsf": "'C-alpha\n'", 
                 "rms": "'C-alpha\nC-alpha\n'", 
                 "gyrate": "'\"C-alpha\"\n'", 
+                "density": "SOL", 
             }
-            for target in ["rmsf", "rms", "gyrate",]:
+            for target in ["rmsf", "rms", "gyrate", "density"]:
                 if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg"):
                     print(f"Calculating {target} for NPT with fc {f_const}...")
                     # 3 means Ca only
@@ -390,19 +394,19 @@ class GromacsRunner:
                     print(f"✓ {target} saved for NPT with fc {f_const} MD\n")
                 
             top_filename = f"{top_filename}_fc{f_const}"
-            gro_filename = f"npt{i}_{temp}K_fc{f_const}"
+            gro_filename = f"npt_{temp}K_fc{f_const}"
 
             print(f"Delete posre_fc{f_const}.itp from the running directory\n")
             os.remove(f"{folder_path}/posre.itp")
             
         return gro_filename, top_filename
 
-    def _run_relax_md(self, folder_path, gro_filename, top_filename, tot_time, temp):
+    def _run_relax_md(self, folder_path, gro_filename, top_filename, tot_time, temp, rep):
         print(f"\n{'='*60}")
-        print(f"RELAXATION MD ({tot_time} ns) for {folder_path}")
+        print(f"RELAXATION MD ({tot_time} ns) for {folder_path}, replicate {rep}")
         print(f"{'='*60}\n")
         
-        tpr_name = f"md_relax_{temp}K_{temp}K_{tot_time}ns"
+        tpr_name = f"md_relax_{temp}K_{temp}K_{tot_time}ns_r{rep}"
 
         if not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc") and \
         not os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
@@ -412,7 +416,7 @@ class GromacsRunner:
             self._run_command(cmd, cwd=folder_path)
             
             # Run production MD
-            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} "
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
                    f"-v -deffnm {tpr_name} -nb gpu")
             print(f"Running relaxation MD ...")
             self._run_command(cmd, cwd=folder_path)
@@ -438,6 +442,7 @@ class GromacsRunner:
             "Potential": "Potential", 
             "Kinetic-En.": "KE", 
             "Pressure": "Pressure", 
+            # "Total-Energy": "TotEnergy"
         }
         for target in ["Temperature", "Potential", "Kinetic-En.", "Pressure"]:
             if not os.path.exists(f"{folder_path}/{tpr_name}_{d[target].lower()}.xvg"):
@@ -450,8 +455,9 @@ class GromacsRunner:
             "rmsf": "'C-alpha\n'", 
             "rms": "'C-alpha\nC-alpha\n'", 
             "gyrate": "'\"C-alpha\"\n'", 
+            "density": "SOL", 
         }
-        for target in ["rmsf", "rms", "gyrate",]:
+        for target in ["rmsf", "rms", "gyrate", "density"]:
             if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg") and tot_time >= 10:
                 print(f"Calculating {target} for relaxation MD...")
                 # 3 means Ca only
@@ -459,12 +465,12 @@ class GromacsRunner:
                 self._run_command(cmd, cwd=folder_path)
                 print(f"✓ {target} saved for relaxation MD\n")
 
-        gro_filename = f"md_relax_{temp}K_{temp}K_{tot_time}ns"
+        gro_filename = f"{tpr_name}"
         top_filename = f"{top_filename}_mdrelax"
         return gro_filename, top_filename
     
         
-    def _run_production_md(self, folder_path, gro_filename, top_filename, tot_time, temp_start, temp_end):
+    def _run_production_md(self, folder_path, gro_filename, top_filename, tot_time, temp_start, temp_end, rep):
         """
         Run production MD simulations with replicates.
         
@@ -474,100 +480,112 @@ class GromacsRunner:
             tot_time: Total simulation time in nanoseconds
         """
         print(f"\n{'='*60}")
-        print(f"PRODUCTION MD ({self.replicate} replicates × {tot_time} ns) for {folder_path}")
+        print(f"PRODUCTION MD ({tot_time} ns) for {folder_path}, repliace {rep}")
         print(f"{'='*60}\n")
 
-        for i in range(self.replicate): # 
-            # Generate md.tpr
-            tpr_name = f"md_{temp_start}K_{temp_end}K_{tot_time}ns_r{i}"
+        # identify the min npt fc
+        # min_fc = min(self.npt_scheme.keys())
+        # assert f"npt_{temp_start}K_fc{min_fc}" == gro_filename
+        
+        # for i in range(self.replicate): # 
+        # Generate md.tpr
+        tpr_name = f"md_{temp_start}K_{temp_end}K_{tot_time}ns_r{rep}"
+        
+        if not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc") and \
+        not os.path.exists(f"{tpr_name}_b{self.snapshot_begin_at_ps}.xtc") and \
+        not os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
+            print(f"\n--- Replicate {rep} ---")
+            cmd = (f"gmx grompp -f md_{temp_start}K_{temp_end}K_{tot_time}ns.mdp "
+                   f"-c {gro_filename}.gro -t {gro_filename}.cpt "
+                   f"-r {gro_filename}.gro -p topol.top -o {tpr_name}.tpr")
+            self._run_command(cmd, cwd=folder_path)
             
-            if not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc") and \
-            not os.path.exists(f"{tpr_name}_b{self.snapshot_begin_at_ps}.xtc") and \
-            not os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
-                print(f"\n--- Replicate {i} ---")
-                cmd = (f"gmx grompp -f md_{temp_start}K_{temp_end}K_{tot_time}ns.mdp "
-                       f"-c {gro_filename}.gro -t {gro_filename}.cpt "
-                       f"-r {gro_filename}.gro -p topol.top -o {tpr_name}.tpr")
-                self._run_command(cmd, cwd=folder_path)
-                
-                # Run production MD
-                cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} "
-                       f"-v -deffnm {tpr_name} -nb gpu")
-                print(f"Running production MD replicate {i}...")
-                self._run_command(cmd, cwd=folder_path)
-                print(f"✓ Replicate {i} complete\n")
+            # Run production MD
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
+                   f"-v -deffnm {tpr_name} -nb gpu")
+            print(f"Running production MD replicate {rep}...")
+            self._run_command(cmd, cwd=folder_path)
+            print(f"✓ Replicate {rep} complete\n")
 
-                # trim xtc according to beginning
-                print(f"Post-processing of xtc for replicate {i}...")
-                if self.snapshot_begin_at_ps > 0:
-                    print(f"xtc snapshot begins at {self.snapshot_begin_at_ps} ns replicate {i}...")
-                    cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -f {tpr_name}.xtc -o {tpr_name}_b{self.snapshot_begin_at_ps}.xtc -b {self.snapshot_begin_at_ps} -dt {self.dt}"
-                    self._run_command(cmd, cwd=folder_path)
-
-                    if self.delete_old_xtc:
-                        os.remove(f"{folder_path}/{tpr_name}.xtc")
-                        
-                    old_xtc_name = f"{tpr_name}_b{self.snapshot_begin_at_ps}"
-
-            if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
-            not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
-                # Ensure xtc protein do not cross the box boundary
-                print(f"Center with pbc for replicate {i}...")
-                # 
-                cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
+            # trim xtc according to beginning
+            print(f"Post-processing of xtc for replicate {rep}...")
+            if self.snapshot_begin_at_ps > 0:
+                print(f"xtc snapshot begins at {self.snapshot_begin_at_ps} ns replicate {rep}...")
+                cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -f {tpr_name}.xtc -o {tpr_name}_b{self.snapshot_begin_at_ps}.xtc -b {self.snapshot_begin_at_ps} -dt {self.dt}"
                 self._run_command(cmd, cwd=folder_path)
-                
+
                 if self.delete_old_xtc:
                     os.remove(f"{folder_path}/{tpr_name}.xtc")
+                    
+                old_xtc_name = f"{tpr_name}_b{self.snapshot_begin_at_ps}"
+
+        if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
+        not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
+            # Ensure xtc protein do not cross the box boundary
+            print(f"Center with pbc for replicate {rep}...")
+            # 
+            cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
+            self._run_command(cmd, cwd=folder_path)
             
-            # Save snapshot(s) as pdb
-            def save_snapshot(idx):
-                if not os.path.exists(f"{tpr_name}_pbc_center_compact_dump{idx}.pdb -dump {idx}"):
-                    # 0 means output the whole system
-                    cmd = (f"printf 'System\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}_pbc_center_compact.xtc " 
-                           f" -o {tpr_name}_pbc_center_compact_dump{idx}.pdb -dump {idx}")
-                    self._run_command(cmd, cwd=folder_path)
-                
-            with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
-                futures = [executor.submit(save_snapshot, idx) for idx in self.md_snapshot_idx]
-                for fut in futures:
-                    fut.result()
-                
-            self._rename_and_remove_topol(folder_path=folder_path, new_topol_name=f"{top_filename}_md{i}")
-            print(f"xtc corrected according to the periodic boundary conditions for replicate {i}...")
+            if self.delete_old_xtc:
+                os.remove(f"{folder_path}/{tpr_name}.xtc")
+        
+        # Save snapshot(s) as pdb
+        def save_snapshot(idx):
+            if not os.path.exists(f"{tpr_name}_pbc_center_compact_dump{idx}.pdb -dump {idx}"):
+                # 0 means output the whole system
+                cmd = (f"printf 'System\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}_pbc_center_compact.xtc " 
+                       f" -o {tpr_name}_pbc_center_compact_dump{idx}.pdb -dump {idx}")
+                self._run_command(cmd, cwd=folder_path)
+                cmd = (f"printf 'Protein\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}_pbc_center_compact.xtc " 
+                       f" -o {tpr_name}_pbc_center_compact_dump{idx}_Protein.pdb -dump {idx}")
+                self._run_command(cmd, cwd=folder_path)
+            
+        with ThreadPoolExecutor(max_workers=self.n_threads) as executor:
+            futures = [executor.submit(save_snapshot, idx) for idx in self.md_snapshot_idx]
+            for fut in futures:
+                fut.result()
+            
+        self._rename_and_remove_topol(folder_path=folder_path, new_topol_name=f"{top_filename}_md{rep}")
+        print(f"xtc corrected according to the periodic boundary conditions for replicate {rep}...")
 
-            d = {
-                "Temperature":"Temperature", 
-                "Potential": "Potential", 
-                "Kinetic-En.": "KE", 
-                "Pressure": "Pressure", 
-            }
-            for target in ["Temperature", "Potential", "Kinetic-En.", "Pressure"]:
-                if not os.path.exists(f"{folder_path}/{tpr_name}_{d[target].lower()}.xvg"):
-                    print(f"Calculating {target.lower()} for production MD...")
-                    cmd = f"printf '{target}\n' | gmx energy -f {tpr_name}.edr -o {tpr_name}_{d[target].lower()}.xvg"
-                    self._run_command(cmd, cwd=folder_path)
-                    print(f"✓ {target} saved for production MD\n")
-    
-            d = {
-                "rmsf": "'C-alpha\n'", 
-                "rms": "'C-alpha\nC-alpha\n'", 
-                "gyrate": "'\"C-alpha\"\n'", 
-            }
-            for target in ["rmsf", "rms", "gyrate",]:
-                if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg") and tot_time >= 10:
-                    print(f"Calculating {target} for production MD...")
-                    # 3 means Ca only
-                    cmd = (f"printf {d[target]} | gmx {target} -f {tpr_name}_pbc_center_compact.xtc -s {tpr_name}.tpr "
-                           f"-o {tpr_name}_{target}.xvg")
-                    self._run_command(cmd, cwd=folder_path)
-                    print(f"✓ {target} saved for production MD\n")
+        d = {
+            "Temperature":"Temperature", 
+            "Potential": "Potential", 
+            "Kinetic-En.": "KE", 
+            "Pressure": "Pressure", 
+            # "Total-Energy": "TotEnergy"
+        }
+        for target in ["Temperature", "Potential", "Kinetic-En.", "Pressure"]:
+            if not os.path.exists(f"{folder_path}/{tpr_name}_{d[target].lower()}.xvg"):
+                print(f"Calculating {target.lower()} for production MD...")
+                cmd = f"printf '{target}\n' | gmx energy -f {tpr_name}.edr -o {tpr_name}_{d[target].lower()}.xvg"
+                self._run_command(cmd, cwd=folder_path)
+                print(f"✓ {target} saved for production MD\n")
 
+        d = {
+            "rmsf": "'C-alpha\n'", 
+            "rms": "'C-alpha\nC-alpha\n'", 
+            "gyrate": "'\"C-alpha\"\n'", 
+            "density": "SOL", 
+        }
+        for target in ["rmsf", "rms", "gyrate", "density"]:
+            if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg") and tot_time >= 10:
+                print(f"Calculating {target} for production MD...")
+                # 3 means Ca only
+                cmd = (f"printf {d[target]} | gmx {target} -f {tpr_name}_pbc_center_compact.xtc -s {tpr_name}.tpr "
+                       f"-o {tpr_name}_{target}.xvg")
+                self._run_command(cmd, cwd=folder_path)
+                print(f"✓ {target} saved for production MD\n")
+        return temp_start, temp_end
+
+    def compile_rmsf_csv(self, temp_start, temp_end):
+        tpr_name = f"md_{temp_start}K_{temp_end}K_{self.md_tot_time_ns}ns"
         # Collect all rmsf into one csv
         if not os.path.exists(f"{folder_path}/{tpr_name}_rmsf.csv") and tot_time >= 10:
             DF = pd.DataFrame()
             for i in range(self.replicate):
-                df = pd.read_csv(f"{folder_path}/{tpr_name}_rmsf.xvg", 
+                df = pd.read_csv(f"{folder_path}/{tpr_name}_r{rep}_rmsf.xvg", 
                                  header=16, sep='  ')
                 DF[f"r{i}"] = df["@TYPE xy"]
             cols = [f"r{i}" for i in range(self.replicate)]
@@ -625,9 +643,18 @@ class GromacsRunner:
             tot_time=tot_time, npt_scheme=self.npt_scheme, task=self.task
         )
         
+        # Execute based on flags
+        # if add_h == 1 and run_md == 0:
+        #     # Only add hydrogens
+        #     self._add_hydrogen_only(folder_path, file, temp)
+        
+        # elif run_md == 1:
+            # Full MD workflow
         gro_filename, top_filename = self._run_preparation_steps(destination_path, file)
         if self.task in ['solvate', 'solvate_with_ion']:
             return
+
+        # EM - NVT cycle
         for i in range(self.em_nvt_iter):
             gro_filename, top_filename = self._run_energy_minimization(destination_path, gro_filename, top_filename, i=i)
             if self.task == 'em':
@@ -639,30 +666,42 @@ class GromacsRunner:
                 temp=temp_start, 
                 i=i
             )
+
         gro_filename, top_filename = self._run_npt_equilibration(
             folder_path=destination_path, 
             gro_filename=gro_filename, 
             top_filename=top_filename, 
             temp=temp_start, 
-            i = self.em_nvt_iter
+            # i = self.em_nvt_iter, 
         )
-        if self.relax_md_tot_time_ns > 0:
-            gro_filename, top_filename = self._run_relax_md(
+        
+        for r in range(self.replicate):
+            if self.relax_md_tot_time_ns > 0:
+                gro_filename, top_filename = self._run_relax_md(
+                    folder_path=destination_path, 
+                    gro_filename=gro_filename, 
+                    top_filename=top_filename, 
+                    tot_time=self.relax_md_tot_time_ns, 
+                    temp=temp_start, 
+                    rep=r, 
+                )
+            temp_start, temp_end = self._run_production_md(
                 folder_path=destination_path, 
                 gro_filename=gro_filename, 
                 top_filename=top_filename, 
-                tot_time=self.relax_md_tot_time_ns, 
-                temp=temp_start, 
+                tot_time=tot_time, 
+                temp_start=temp_start, 
+                temp_end=temp_end, 
+                rep=r, 
             )
-        self._run_production_md(
-            folder_path=destination_path, 
-            gro_filename=gro_filename, 
-            top_filename=top_filename, 
-            tot_time=tot_time, 
-            temp_start=temp_start, 
-            temp_end=temp_end
-        )
+        compile_rmsf_csv(temp_start, temp_end)
     
+        # else:
+        #     print("⚠ No action requested (both add_H and md are 0)")
+
+        # Move pdb back to source_dir --> tb done at run_gmx.py with parallel
+        # if self.return_pdb_to_source:
+        #     os.rename(f"{destination_path}/{file}", f"{self.source_dir}/{file}")
             
         print(f"\n✓ CLIENT {idx + 1} COMPLETE: {folder}\n")
     
