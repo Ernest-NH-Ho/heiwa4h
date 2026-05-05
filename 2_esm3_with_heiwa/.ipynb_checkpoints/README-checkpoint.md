@@ -57,6 +57,7 @@ You may like to
 - Set the number of CPU at ```self.NUM_CPU```
 - Set the location of your DSSP file at ```self.DSSP_DIR```
 - Set the location of your csv file at ```self.CSV_PATH```
+- At ```self.ESM3_TRACKS```, disable the last 8-iter 'sequence' track to regenerate X tensors, enable it to generate de novo sequences.
 - Set the output folder name ```self.DATASET_NAME```. As such your embedding and protein objects would be saved in ```esm3_embeddings/DATASET_NAME``` and ```esm3_proteins/DATASET_NAME```.
 
 ### Run

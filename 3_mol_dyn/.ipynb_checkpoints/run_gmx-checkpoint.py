@@ -111,8 +111,8 @@ if __name__ == "__main__":
                   "em_nvt_iter":10, 
                   "dt_em": 0.01, "em_max_steps": 250000,
                   "npt_scheme": {1000:50, 316:50, 100:50, 40:120, 16:160, 7:200, 3:225, 1.2:200, 0.5:250, 0.2:225, 0:1000}, # key=force_contants, value=time(ps)
-                  "relax_md_tot_time_ns": 10, 
-                  "dt": 0.002, "snapshot_interval":25000, "replicate": 1, "md_snapshot_idx": [0, 1999], "md_tot_time_ns": 100, 
+                  "relax_md_tot_time_ns": 30, 
+                  "dt": 0.002, "snapshot_interval":25000, "replicate": 2, "md_snapshot_idx": [0, 600, 1999], "md_tot_time_ns": 100, 
                   "snapshot_begin_at_ps": 0, "delete_old_xtc": True, # be careful if set to True
                   "n_threads": 24, "gpu_id":0, 
                   "allow_parallel_cpu_for_multiple_sample": False}

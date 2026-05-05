@@ -425,6 +425,13 @@ class GromacsRunner:
 
         if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
         not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
+            # Run production MD
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
+                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -append")
+            print(f"Running relaxation MD ...")
+            self._run_command(cmd, cwd=folder_path)
+            print(f"✓ Relaxation MD complete\n")
+            
             # Ensure xtc protein do not cross the box boundary
             print(f"Center with pbc for relaxation MD...")
             cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
@@ -501,7 +508,7 @@ class GromacsRunner:
             self._run_command(cmd, cwd=folder_path)
             
             # Run production MD
-            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
                    f"-v -deffnm {tpr_name} -nb gpu")
             print(f"Running production MD replicate {rep}...")
             self._run_command(cmd, cwd=folder_path)
@@ -521,9 +528,15 @@ class GromacsRunner:
 
         if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
         not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
+            # Run production MD
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
+                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -append")
+            print(f"Running production MD replicate {rep}...")
+            self._run_command(cmd, cwd=folder_path)
+            print(f"✓ Replicate {rep} complete\n")
+            
             # Ensure xtc protein do not cross the box boundary
             print(f"Center with pbc for replicate {rep}...")
-            # 
             cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
             self._run_command(cmd, cwd=folder_path)
             
@@ -579,20 +592,20 @@ class GromacsRunner:
                 print(f"✓ {target} saved for production MD\n")
         return temp_start, temp_end
 
-    def compile_rmsf_csv(self, temp_start, temp_end):
+    def compile_rmsf_csv(self, temp_start, temp_end, folder_path):
         tpr_name = f"md_{temp_start}K_{temp_end}K_{self.md_tot_time_ns}ns"
         # Collect all rmsf into one csv
-        if not os.path.exists(f"{folder_path}/{tpr_name}_rmsf.csv") and tot_time >= 10:
+        if not os.path.exists(f"{folder_path}/{tpr_name}_rmsf.csv"):
             DF = pd.DataFrame()
             for i in range(self.replicate):
-                df = pd.read_csv(f"{folder_path}/{tpr_name}_r{rep}_rmsf.xvg", 
+                df = pd.read_csv(f"{folder_path}/{tpr_name}_r{i}_rmsf.xvg", 
                                  header=16, sep='  ')
                 DF[f"r{i}"] = df["@TYPE xy"]
             cols = [f"r{i}" for i in range(self.replicate)]
             DF["avg"] = DF[cols].mean(axis=1)
             if self.replicate > 1:
                 DF["std"] = DF[cols].std(axis=1)
-            DF.to_csv(f"{folder_path}/md_{temp_start}K_{temp_end}K_{tot_time}ns_rmsf.csv", index=False)
+            DF.to_csv(f"{folder_path}/{tpr_name}_rmsf.csv", index=False)
             
         print(f"{'='*60}")
         print(f"ALL {self.replicate} REPLICATES COMPLETE for {folder_path}")
@@ -694,7 +707,11 @@ class GromacsRunner:
                 temp_end=temp_end, 
                 rep=r, 
             )
-        compile_rmsf_csv(temp_start, temp_end)
+        self.compile_rmsf_csv(
+            temp_start=temp_start, 
+            temp_end=temp_end, 
+            folder_path=destination_path
+        )
     
         # else:
         #     print("⚠ No action requested (both add_H and md are 0)")
