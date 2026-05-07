@@ -38,6 +38,9 @@ This script is designed to be easily manipulated by only modifying three python 
 - Name the location of dataset at ```self.DATA_FOLDER``` if your tensors are saved at ```data/DATA_FOLDER/```.
 - For multiple hp tuning, open ```modules/train_control/hp_tuning.py``` and set ```self.hp_to_try``` in ```class HyperparameterTuner```. The name of the keys would be added to ```class Parameters``` as add-on attributes.
 
+## Data of biophysical analysis
+For the reproduction of biophysical analysis, all pdb files corresponding to ```X_infernece.pt``` are made available in ```biophys_analysis/```. The results of their biophysical analysis were also provided. 
+
 ## Run
 ```bash
 python train_run.py -head 4
