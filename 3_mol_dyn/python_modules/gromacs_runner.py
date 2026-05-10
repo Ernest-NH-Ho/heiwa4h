@@ -121,7 +121,29 @@ class GromacsRunner:
         shutil.copy(f"{folder_path}/topol.top", f"{folder_path}/{new_topol_name}.top")
         if os.path.exists(f"{folder_path}/#topol.top.1#"):
             os.remove(f"{folder_path}/#topol.top.1#")
+
+    def concat_trj(self, folder_path, tpr_name):
+        d = {
+            "xtc": "trjcat", 
+            "edr": "eneconv"
+        }
+        
+        for suffix in d:
+            i = 2
+            file = f"{folder_path}/{tpr_name}.part{i:04}.{suffix}"
+            while os.path.exists(file):
+                i += 1
+                file = f"{folder_path}/{tpr_name}.part{i:04}.{suffix}"
     
+            if i >= 2+1:
+                i_list = range(2, i)
+                file_list = [f"{tpr_name}.{suffix}"] + [f"{tpr_name}.part{i:04}.{suffix}" for i in i_list]
+                cmd = f"gmx {d[suffix]} -f {' '.join(file_list)} -o {tpr_name}_combine.{suffix}"
+                self._run_command(cmd, cwd=folder_path)
+                os.rename(f"{folder_path}/{tpr_name}.{suffix}", f"{folder_path}/{tpr_name}_old.{suffix}")
+                os.rename(f"{folder_path}/{tpr_name}_combine.{suffix}", f"{folder_path}/{tpr_name}.{suffix}")
+
+
     def _run_preparation_steps(self, folder_path, file):
         """
         Run system preparation: pdb2gmx, create box, solvate, add ions.
@@ -253,8 +275,9 @@ class GromacsRunner:
             
         f_const = 1000
         # for f_const in self.npt_scheme:
-        cmd = f"printf '2\n' | gmx genrestr -f {gro_filename}.gro -o posre_nvt/posre_fc{f_const}.itp -fc {f_const}"
-        self._run_command(cmd, cwd=folder_path)
+        if not os.path.exists(f"{folder_path}/posre_nvt/posre_fc{f_const}.itp"):
+            cmd = f"printf '2\n' | gmx genrestr -f {gro_filename}.gro -o posre_nvt/posre_fc{f_const}.itp -fc {f_const}"
+            self._run_command(cmd, cwd=folder_path)
 
         shutil.copy(
             f"{folder_path}/posre_nvt/posre_fc{f_const}.itp", 
@@ -327,8 +350,9 @@ class GromacsRunner:
             os.makedirs(f"{folder_path}/posre", exist_ok=True)
 
         for f_const in self.npt_scheme:
-            cmd = f"printf '2\n' | gmx genrestr -f {gro_filename}.gro -o posre/posre_fc{f_const}.itp -fc {f_const}"
-            self._run_command(cmd, cwd=folder_path)
+            if not os.path.exists(f"{folder_path}/posre/posre_fc{f_const}.itp"):
+                cmd = f"printf '2\n' | gmx genrestr -f {gro_filename}.gro -o posre/posre_fc{f_const}.itp -fc {f_const}"
+                self._run_command(cmd, cwd=folder_path)
             
         if os.path.exists(f"{folder_path}/posre.itp"):
             os.remove(f"{folder_path}/posre.itp")
@@ -408,6 +432,7 @@ class GromacsRunner:
         
         tpr_name = f"md_relax_{temp}K_{temp}K_{tot_time}ns_r{rep}"
 
+        # Fresh start
         if not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc") and \
         not os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
             cmd = (f"gmx grompp -f md_relax_{temp}K_{temp}K_{tot_time}ns.mdp "
@@ -416,32 +441,57 @@ class GromacsRunner:
             self._run_command(cmd, cwd=folder_path)
             
             # Run production MD
-            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
                    f"-v -deffnm {tpr_name} -nb gpu")
             print(f"Running relaxation MD ...")
             self._run_command(cmd, cwd=folder_path)
             print(f"✓ Relaxation MD complete\n")
 
-
-        if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
-        not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
+            # Ensure xtc protein do not cross the box boundary
+            print(f"Center with pbc for relaxation MD...")
+            cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
+            self._run_command(cmd, cwd=folder_path)
+    
+        # If previous record exists
+        elif os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
+            # Get the last checkpoint
+            if os.path.exists(f"{folder_path}/{tpr_name}_prev.cpt"):
+                if os.path.exists(f"{folder_path}/{tpr_name}.cpt"):
+                    os.rename(
+                        f"{folder_path}/{tpr_name}.cpt", 
+                        f"{folder_path}/{tpr_name}_discard.cpt"
+                    )
+                os.rename(
+                    f"{folder_path}/{tpr_name}_prev.cpt", 
+                    f"{folder_path}/{tpr_name}.cpt"
+                )
+                if os.path.exists(f"{folder_path}/{tpr_name}_discard.cpt"):
+                    os.remove(f"{folder_path}/{tpr_name}_discard.cpt")
+                    
             # Run production MD
             cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
-                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -append")
+                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -noappend")
             print(f"Running relaxation MD ...")
             self._run_command(cmd, cwd=folder_path)
             print(f"✓ Relaxation MD complete\n")
+
+            self.concat_trj(
+                folder_path=folder_path, 
+                tpr_name=tpr_name
+            )
             
             # Ensure xtc protein do not cross the box boundary
             print(f"Center with pbc for relaxation MD...")
             cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
             self._run_command(cmd, cwd=folder_path)
+
             
-            if self.delete_old_xtc:
-                os.remove(f"{folder_path}/{tpr_name}.xtc")
-                
-            self._rename_and_remove_topol(folder_path=folder_path, new_topol_name=f"{top_filename}_mdrelax")
-            print(f"xtc corrected according to the periodic boundary conditions for relax MD ...")
+        
+        if self.delete_old_xtc and os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
+            os.remove(f"{folder_path}/{tpr_name}.xtc")
+            
+        self._rename_and_remove_topol(folder_path=folder_path, new_topol_name=f"{top_filename}_mdrelax")
+        print(f"xtc corrected according to the periodic boundary conditions for relax MD ...")
         # quit()
         
         d = {
@@ -497,7 +547,8 @@ class GromacsRunner:
         # for i in range(self.replicate): # 
         # Generate md.tpr
         tpr_name = f"md_{temp_start}K_{temp_end}K_{tot_time}ns_r{rep}"
-        
+
+        # Fresh start
         if not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc") and \
         not os.path.exists(f"{tpr_name}_b{self.snapshot_begin_at_ps}.xtc") and \
         not os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
@@ -508,7 +559,7 @@ class GromacsRunner:
             self._run_command(cmd, cwd=folder_path)
             
             # Run production MD
-            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
                    f"-v -deffnm {tpr_name} -nb gpu")
             print(f"Running production MD replicate {rep}...")
             self._run_command(cmd, cwd=folder_path)
@@ -526,22 +577,46 @@ class GromacsRunner:
                     
                 old_xtc_name = f"{tpr_name}_b{self.snapshot_begin_at_ps}"
 
-        if os.path.exists(f"{folder_path}/{tpr_name}.xtc") and \
-        not os.path.exists(f"{folder_path}/{tpr_name}_pbc_center_compact.xtc"):
+            # Ensure xtc protein do not cross the box boundary
+            print(f"Center with pbc for replicate {rep}...")
+            cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
+            self._run_command(cmd, cwd=folder_path)
+
+        # If previous record exists
+        elif os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
+            # Get the last checkpoint
+            if os.path.exists(f"{folder_path}/{tpr_name}_prev.cpt"):
+                if os.path.exists(f"{folder_path}/{tpr_name}.cpt"):
+                    os.rename(
+                        f"{folder_path}/{tpr_name}.cpt", 
+                        f"{folder_path}/{tpr_name}_discard.cpt"
+                    )
+                os.rename(
+                    f"{folder_path}/{tpr_name}_prev.cpt", 
+                    f"{folder_path}/{tpr_name}.cpt"
+                )
+                if os.path.exists(f"{folder_path}/{tpr_name}_discard.cpt"):
+                    os.remove(f"{folder_path}/{tpr_name}_discard.cpt")
+                    
             # Run production MD
-            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+1234} "
-                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -append")
+            cmd = (f"gmx mdrun -gpu_id {self.gpu_id} -nt {self.n_threads} -reseed {rep*2+12345} "
+                   f"-v -deffnm {tpr_name} -nb gpu -cpi {tpr_name}.cpt -noappend")
             print(f"Running production MD replicate {rep}...")
             self._run_command(cmd, cwd=folder_path)
             print(f"✓ Replicate {rep} complete\n")
+
+            self.concat_trj(
+                folder_path=folder_path, 
+                tpr_name=tpr_name
+            )
             
             # Ensure xtc protein do not cross the box boundary
             print(f"Center with pbc for replicate {rep}...")
             cmd = f"printf 'Protein\nSystem\n' | gmx trjconv -s {tpr_name}.tpr -f {tpr_name}.xtc -o {tpr_name}_pbc_center_compact.xtc -pbc mol -center -ur compact" # 1 means just center the protein -> 0 means output the whole system
             self._run_command(cmd, cwd=folder_path)
             
-            if self.delete_old_xtc:
-                os.remove(f"{folder_path}/{tpr_name}.xtc")
+        if self.delete_old_xtc and os.path.exists(f"{folder_path}/{tpr_name}.xtc"):
+            os.remove(f"{folder_path}/{tpr_name}.xtc")
         
         # Save snapshot(s) as pdb
         def save_snapshot(idx):
