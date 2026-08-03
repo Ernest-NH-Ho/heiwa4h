@@ -1,0 +1,74 @@
+# This file was created Sun May 24 05:27:02 2026
+# Created by:
+#                     :-) GROMACS - gmx density, 2026.0 (-:
+# 
+# Executable:   /usr/local/gromacs/bin/gmx
+# Data prefix:  /usr/local/gromacs
+# Working dir:  /home/aiuser/ErnestHo_NCKU/Gmx/20repr_192_224_202605_softSASA_msSeed2_heiwa1/AF-A3LW52-F1-model_v4_heiwa1_full
+# Command line:
+#   gmx density -f md_310K_368K_100ns_r2_pbc_center_compact.xtc -s md_310K_368K_100ns_r2.tpr -o md_310K_368K_100ns_r2_density.xvg
+# gmx density is part of G R O M A C S:
+#
+# Giant Rising Ordinary Mutants for A Clerical Setup
+#
+@    title "Partial density"
+@    xaxis  label "Average coordinate (nm)"
+@    yaxis  label "Density (kg m\S-3\N)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "SOL"
+   0.0753085          965.178
+    0.225925          963.566
+    0.376542          963.286
+    0.527159          961.652
+    0.677776          960.791
+    0.828393          959.304
+     0.97901          957.438
+     1.12963          952.846
+     1.28024          947.744
+     1.43086          943.353
+     1.58148          935.751
+     1.73209          931.134
+     1.88271          924.881
+     2.03333          918.472
+     2.18395          913.458
+     2.33456          908.523
+     2.48518          903.864
+      2.6358          900.538
+     2.78641          895.379
+     2.93703          893.695
+     3.08765          889.028
+     3.23826          889.038
+     3.38888          884.442
+      3.5395          884.358
+     3.69011          883.723
+     3.84073          883.913
+     3.99135          885.216
+     4.14196          887.795
+     4.29258          890.802
+      4.4432          893.113
+     4.59382          898.905
+     4.74443          904.125
+     4.89505          912.732
+     5.04567          918.829
+     5.19628          927.524
+      5.3469            933.6
+     5.49752          940.807
+     5.64813          945.869
+     5.79875          949.996
+     5.94937          952.862
+     6.09999          956.202
+      6.2506          958.824
+     6.40122          960.603
+     6.55184          962.058
+     6.70245          962.484
+     6.85307          963.537
+     7.00369          964.165
+      7.1543          964.212
+     7.30492           963.81
+     7.45554          962.738

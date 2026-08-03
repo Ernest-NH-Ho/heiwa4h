@@ -306,11 +306,11 @@ gen_vel                 = no        ; Velocity generation is off
         print(f"Temperature: {temp_start} K to {temp_end} K, Production time: {tot_time} ns")
         print(f"{'='*60}\n")
 
-        if task in ("solvate_with_ion", "em", "nvt", "npt", "md"):
+        if task in ("solvate_with_ion", "em", "nvt", "npt", "relax_md", "md"):
             self._write_ions_mdp()
-        if task in ("em", "nvt", "npt", "md"):
+        if task in ("em", "nvt", "npt", "relax_md", "md"):
             self._write_minim_mdp()
-        if task == "md":
+        if task in ("relax_md", "md"):
             self._write_nvt_mdp(temp_start)
             # self._write_posres_itp(npt_scheme)
             self._write_npt_mdp(temp_start, npt_scheme=npt_scheme)

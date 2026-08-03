@@ -1,0 +1,74 @@
+# This file was created Fri May 22 14:27:26 2026
+# Created by:
+#                     :-) GROMACS - gmx density, 2026.0 (-:
+# 
+# Executable:   /usr/local/gromacs/bin/gmx
+# Data prefix:  /usr/local/gromacs
+# Working dir:  /home/aiuser/ErnestHo_NCKU/Gmx/20repr_192_224_202605_softSASA_msSeed2_heiwa0/AF-A1C603-F1-model_v4_heiwa0_full
+# Command line:
+#   gmx density -f md_310K_368K_100ns_r1_pbc_center_compact.xtc -s md_310K_368K_100ns_r1.tpr -o md_310K_368K_100ns_r1_density.xvg
+# gmx density is part of G R O M A C S:
+#
+# Guyana Rwanda Oman Macau Angola Cameroon Senegal
+#
+@    title "Partial density"
+@    xaxis  label "Average coordinate (nm)"
+@    yaxis  label "Density (kg m\S-3\N)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "SOL"
+   0.0660008          966.962
+    0.198002          964.263
+    0.330004          965.089
+    0.462006          962.973
+    0.594007          963.809
+    0.726009          959.326
+     0.85801          958.187
+    0.990012          954.242
+     1.12201          950.536
+     1.25401          945.253
+     1.38602            940.4
+     1.51802          934.469
+     1.65002          928.485
+     1.78202          922.595
+     1.91402           913.41
+     2.04602          904.435
+     2.17803          895.441
+     2.31003          886.759
+     2.44203          876.448
+     2.57403          870.084
+     2.70603          860.202
+     2.83803          856.251
+     2.97004          851.854
+     3.10204          847.835
+     3.23404          848.903
+     3.36604          849.694
+     3.49804          851.449
+     3.63004          855.384
+     3.76204           859.85
+     3.89405          862.502
+     4.02605          870.338
+     4.15805          874.392
+     4.29005          883.094
+     4.42205          890.989
+     4.55405          898.581
+     4.68606          905.855
+     4.81806          913.453
+     4.95006          921.027
+     5.08206          927.109
+     5.21406          933.452
+     5.34606          939.294
+     5.47807          946.898
+     5.61007          950.758
+     5.74207          954.776
+     5.87407          961.123
+     6.00607          961.421
+     6.13807          963.335
+     6.27007          966.013
+     6.40208          963.689
+     6.53408          963.086
