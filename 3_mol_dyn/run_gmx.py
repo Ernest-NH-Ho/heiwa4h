@@ -99,22 +99,25 @@ task = args.task
 if __name__ == "__main__":
     # Run the dry test (MDP file generation only)
     # test_gromacs_runner_dry_run()
-    components = {"client_list": pd.read_csv("sample_csv_file.csv",  header=0), 
-                  "source_dir": "/home/user/30repr_202604_192_224_heiwa1", 
-                  "destination_dir": "/home/user/30repr_202604_192_224_heiwa1", 
+    components = {"client_list": pd.read_csv("file_name.csv",  header=0)
+                  "source_dir": "path_to_source", 
+                  "destination_dir": "path_to_destination", 
                   "return_pdb_to_source": False, 
+                  "run_from_start": False,
                   "box_shape": "dodecahedron", 
-                  "box_margin": 1.2, 
-                  "ff": "amber99sbws",
-                  "water_model": "tip4p", "water_coord": "tip4p.gro",
+                  "box_margin": 1, 
+                  "ff": "amber99sbws", # amber19sb, amber99sb-ildn
+                  "water_model": "tip4p", "water_coord": "tip4p.gro", # ,  opc
                   "cation":"NA", "anion":"CL", "salt_conc":0.15, 
                   "em_nvt_iter":10, 
-                  "dt_em": 0.01, "em_max_steps": 250000,
-                  "npt_scheme": {1000:50, 316:50, 100:50, 40:120, 16:160, 7:200, 3:225, 1.2:200, 0.5:250, 0.2:225, 0:1000}, # key=force_contants, value=time(ps)
+                  "dt_em": 0.01, "em_max_steps": 250000, # "dt_em": 0.01, "em_max_steps": 50000
+                  "npt_scheme": {1000:50, 316:50, 100:50, 40:120, 16:160, 7:200, 3:225, 1.2:200, 0.5:250, 0.2:225, 0:500}, 
                   "relax_md_tot_time_ns": 30, 
-                  "dt": 0.002, "snapshot_interval":25000, "replicate": 2, "md_snapshot_idx": [0, 600, 1999], "md_tot_time_ns": 100, 
-                  "snapshot_begin_at_ps": 0, "delete_old_xtc": True, # be careful if set to True
+                  "dt": 0.002, "snapshot_interval":25000, 
+                  "start_rep": 0, "replicate": 1, "md_snapshot_idx": [0, 599, 1999], "md_tot_time_ns": 100, 
+                  "snapshot_begin_at_ps": 0, "delete_old_xtc": True, 
                   "n_threads": 24, "gpu_id":0, 
+                  "plumed": "plumed.dat", # or ""
                   "allow_parallel_cpu_for_multiple_sample": False}
     # To run actual simulations, uncomment the line below:
     run_full_simulation(task=task, **components)
