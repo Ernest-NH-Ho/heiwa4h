@@ -16,6 +16,8 @@ Download and install DSSP from the official releases:
 3. Replace the following files using the python scripts provided inside ```esm_model/```
 - ```<conda_env>/esm/utils/generation.py```
 - ```<conda_env>/esm/models/esm3.py```
+- ```<conda_env>/esm/layers/transformer_stack.py```
+- ```<conda_env>/esm/layers/blocks.py```
 
 ## Prepare HEIWA model weights
 

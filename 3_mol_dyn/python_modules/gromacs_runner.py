@@ -97,6 +97,8 @@ class GromacsRunner:
              folder_path, 
              edr_target_key=["Temperature", "Potential", "Kinetic-En.", "Pressure", "Density"], 
              xtc_target_key=["rmsf", "rms", "gyrate"], # "density"
+             trj_type="xtc", 
+             center=True, 
             ):
 
         def plot_single_energy(target, tpr_name):
@@ -110,12 +112,15 @@ class GromacsRunner:
             futures = [executor.submit(plot_single_energy, target, tpr_name) for target in edr_target_key]
             for fut in futures:
                 fut.result()
-                
+
+        suffix=""
+        if center and trj_type=="xtc":
+            suffix="_pbc_center_compact"
         def plot_single_xtc(target, tpr_name):
             if not os.path.exists(f"{folder_path}/{tpr_name}_{target}.xvg"):
                 print(f"Calculating {target} for {name_of_run} MD...")
                 # 3 means Ca only
-                cmd = f"printf {xtc_target[target]} | gmx {target} -f {tpr_name}_pbc_center_compact.xtc -s {tpr_name}.tpr -o {tpr_name}_{target}.xvg"
+                cmd = f"printf {xtc_target[target]} | gmx {target} -f {tpr_name}{suffix}.{trj_type} -s {tpr_name}.tpr -o {tpr_name}_{target}.xvg"
                 self._run_command(cmd, cwd=folder_path)
                 print(f"✓ {target} saved for {name_of_run} MD\n")
         
@@ -360,7 +365,9 @@ class GromacsRunner:
         self.plot(
             name_of_run="NVT", 
             tpr_name=f"nvt{i}_{temp}K", 
+            edr_target_key=["Temperature", "Potential", "Kinetic-En.", "Pressure"], 
             folder_path=folder_path, 
+            trj_type="trr", 
         )
 
         print(f"Delete posre_fc{f_const}.itp from the running directory\n")
@@ -427,8 +434,10 @@ class GromacsRunner:
 
             self.plot(
                 name_of_run=f"NPT (fc={f_const})", 
+                edr_target_key=["Temperature", "Potential", "Kinetic-En.", "Pressure"], 
                 tpr_name=f"npt_{temp}K_fc{f_const}", 
                 folder_path=folder_path, 
+                trj_type="trr", 
             )
                 
             top_filename = f"{top_filename}_fc{f_const}"
@@ -711,47 +720,47 @@ class GromacsRunner:
             # Full MD workflow
 
         
-        # gro_filename, top_filename = self._run_preparation_steps(destination_path, file)
-        # if self.task in ['solvate', 'solvate_with_ion']:
-        #     return
+        gro_filename, top_filename = self._run_preparation_steps(destination_path, file)
+        if self.task in ['solvate', 'solvate_with_ion']:
+            return
 
-        # # EM - NVT cycle
-        # if self.run_from_start or self.task in ("em", "nvt"):
-        #     for i in range(self.em_nvt_iter):
-        #         gro_filename, top_filename = self._run_energy_minimization(destination_path, gro_filename, top_filename, i=i)
-        #         if self.task == 'em':
-        #             return
-        #         gro_filename, top_filename = self._run_nvt_equilibration(
-        #             folder_path=destination_path, 
-        #             gro_filename=gro_filename, 
-        #             top_filename=top_filename, 
-        #             temp=temp_start, 
-        #             i=i
-        #         )
+        # EM - NVT cycle
+        if self.run_from_start or self.task in ("em", "nvt"):
+            for i in range(self.em_nvt_iter):
+                gro_filename, top_filename = self._run_energy_minimization(destination_path, gro_filename, top_filename, i=i)
+                if self.task == 'em':
+                    return
+                gro_filename, top_filename = self._run_nvt_equilibration(
+                    folder_path=destination_path, 
+                    gro_filename=gro_filename, 
+                    top_filename=top_filename, 
+                    temp=temp_start, 
+                    i=i
+                )
 
-        # if self.run_from_start or self.task == "npt":
-        #     gro_filename, top_filename = self._run_npt_equilibration(
-        #         folder_path=destination_path, 
-        #         gro_filename=gro_filename, 
-        #         top_filename=top_filename, 
-        #         temp=temp_start, 
-        #         # i = self.em_nvt_iter, 
-        #     )
+        if self.run_from_start or self.task == "npt":
+            gro_filename, top_filename = self._run_npt_equilibration(
+                folder_path=destination_path, 
+                gro_filename=gro_filename, 
+                top_filename=top_filename, 
+                temp=temp_start, 
+                # i = self.em_nvt_iter, 
+            )
         
         for r in range(self.start_rep, self.replicate):
-            # if self.relax_md_tot_time_ns > 0:
-            #     gro_filename, top_filename = self._run_relax_md(
-            #         folder_path=destination_path, 
-            #         gro_filename=gro_filename, 
-            #         top_filename=top_filename, 
-            #         tot_time=self.relax_md_tot_time_ns, 
-            #         temp=temp_start, 
-            #         rep=r, 
-            #     )
-            # if self.task == 'relax_md':
-            #     continue
-            gro_filename = "md_relax_310K_310K_30ns_r0"
-            top_filename = "topol_dodecahedron_1_tip4p_NA_CL_0.15_em0_nvt0_em1_nvt1_em2_nvt2_em3_nvt3_em4_nvt4_em5_nvt5_em6_nvt6_em7_nvt7_em8_nvt8_em9_nvt9_npt_fc1000_fc316_fc100_fc40_fc16_fc7_fc3_fc1.2_fc0.5_fc0.2_fc0" + "_mdrelax" # * (r+1)
+            if self.relax_md_tot_time_ns > 0:
+                gro_filename, top_filename = self._run_relax_md(
+                    folder_path=destination_path, 
+                    gro_filename=gro_filename, 
+                    top_filename=top_filename, 
+                    tot_time=self.relax_md_tot_time_ns, 
+                    temp=temp_start, 
+                    rep=r, 
+                )
+            if self.task == 'relax_md':
+                continue
+            # gro_filename = "md_relax_310K_310K_30ns_r0"
+            # top_filename = "topol_dodecahedron_1_tip4p_NA_CL_0.15_em0_nvt0_em1_nvt1_em2_nvt2_em3_nvt3_em4_nvt4_em5_nvt5_em6_nvt6_em7_nvt7_em8_nvt8_em9_nvt9_npt_fc1000_fc316_fc100_fc40_fc16_fc7_fc3_fc1.2_fc0.5_fc0.2_fc0" + "_mdrelax" # * (r+1)
             temp_start, temp_end = self._run_production_md(
                 folder_path=destination_path, 
                 gro_filename=gro_filename, 
