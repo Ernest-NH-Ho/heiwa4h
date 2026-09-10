@@ -13,6 +13,8 @@ conda env create -f environment.yml
 3. Python implementation
 ```python
 import heiwa
+import torch
+import esm
 
 # ===== Load models (in GPU) =====
 esm3_model = ESM3.from_pretrained(
