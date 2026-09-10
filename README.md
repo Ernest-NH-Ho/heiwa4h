@@ -1,16 +1,14 @@
-## Project intro
+## Project Introduction
 Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding the protein language model ESM3 (https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1), resulting in improved forcefield understanding and higher stability in generated proteins. 
 
-## For easy implementation of heiwa
+## For Easy Implementation of HEIWA
 1. Conda environment
 ```bash
 python write_env_yaml.py --name <name_of_env> --torch <my_version> --cuda <depends_on_your_gpu>
 conda env create -f environment.yml
 ```
 
-2. Obtain your ESM3 model from the official Huggingface release
-
-3. Python implementation
+2. Python implementation
 ```python
 import heiwa
 import torch
@@ -99,8 +97,11 @@ conda install tqdm==4.67.1 esm==3.2.0
 ```
 
 -------------------------------------------------------------------------
-## Other instructions
+## Other Instructions
 Please consult the ```README.md``` inside each folder.
+
+## Version History & Documentation
+https://pypi.org/project/heiwa/
 
 ## Citations
 tbc
