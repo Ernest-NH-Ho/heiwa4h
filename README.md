@@ -12,7 +12,7 @@ conda env create -f environment.yml
 ```python
 import heiwa
 import torch
-import esm
+from esm.models import ESM3
 
 # ===== Load models (in GPU) =====
 esm3_model = ESM3.from_pretrained(
@@ -55,27 +55,27 @@ heiwa.predict(
     cleave,   # Option 2: give the directory
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=False, 
-    exclude_eos=False, 
+    exclude_cls=False, # Option 2: give the directory
+    exclude_eos=False, # Option 2: give the directory
 )
 
-### Load multiple tensors
+### Load multiple tensors or path (Choose 1 option)
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
     thermo_model=thermo_model, 
-    # x=tensor, 
+    x=tensors,         # Option 1: tensors is a list of tensor
     in_path=[
-        "embedding_1.pt", 
+        "embedding_1.pt", # Option 2: a list of input embedding file
         "embedding_2.pt", 
         "embedding_3.pt", 
         "embedding_4.pt", 
     ], 
-    cleave=[0, 0, 0, 0], 
+    cleave=[0, 0, 0, 0], # Option 2: 
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=[True, True, True, True], 
-    exclude_eos=[True, True, True, True], 
+    exclude_cls=[True, True, True, True], # Option 2: 
+    exclude_eos=[True, True, True, True], # Option 2: 
 )
 ```
 
