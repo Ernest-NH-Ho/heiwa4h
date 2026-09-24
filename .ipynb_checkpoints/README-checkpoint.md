@@ -5,29 +5,40 @@ Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding t
 1. Conda environment
 ```bash
 python write_env_yaml.py --name <name_of_env> --torch <my_version> --cuda <depends_on_your_gpu>
-conda env create -f environment.yml
+conda env create -f environment.yaml
 ```
+
+WARNING: heiwa does modify the esm3 script. We recommend a separate environment.
 
 2. Python implementation
 ```python
 import heiwa
 import torch
-from esm.models import ESM3
-
-# ===== Load models (in GPU) =====
-esm3_model = ESM3.from_pretrained(
-    model_name="esm3_sm_open_v1", 
-    device=torch.device("cuda")
-)
-heiwa_model, heiwa_orthogonalizer = heiwa.load_solv_encoder()
-thermo_model = heiwa.load_thermo()
+from esm.models.esm3 import ESM3
 
 # ===== Hardware setting =====
 hw_setting = heiwa.Hardware_Setting(
     cpu=16, 
     batch_size=16, 
-    gpu_rs=12345
+    gpu_rs=12345, 
+    device = "cpu" # or "cuda"
 )
+
+
+# ===== Load models  =====
+# Use model.to(device) for esm3
+esm3_model = ESM3.from_pretrained(
+    model_name="esm3_sm_open_v1", 
+    device=torch.device("cuda")
+)
+
+heiwa_model, heiwa_orthogonalizer = heiwa.load_solv_encoder(hw_setting) # 
+heiwa_orthogonalizer.move_to("cuda")
+heiwa_model.move_to("cuda") 
+
+thermo_model = heiwa.load_thermo(hw_setting)
+thermo_model.move_to("cuda")
+
 
 # ===== Generation commands (Only accept 1 file per run) =====
 heiwa.gen_embed(esm3_model=esm3_model, hw_setting=hw_setting, inFile="a_single_protein.pdb", outPath="./a_single_protein.pt")
@@ -39,7 +50,7 @@ heiwa.de_novo(
     cleave=0, # for signal peptide
     seq_prompt=seq_prompt, # Option 1 for prompt (choose one option only)
     crit_resi = (45, 59, 61, 64, 66, 69, 93, 187), # Option 2 for prompt
-    idx_style=1, # Option 2 for prompt (0 or 1)
+    idx_style=1, # Option 2 only (0 or 1)
     inFile="a_single_protein.cif", 
     outPath="a_single_protein", 
 )
@@ -52,30 +63,30 @@ heiwa.predict(
     thermo_model=thermo_model, 
     x=tensor, # Option 1: directly load a tensor --> exclude_cls & exclude_eos must be None
     in_path,  # Option 2: give the directory
-    cleave,   # Option 2: give the directory
+    cleave,   # Option 2
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=False, # Option 2: give the directory
-    exclude_eos=False, # Option 2: give the directory
+    exclude_cls=False, # Option 2
+    exclude_eos=False, # Option 2
 )
 
-### Load multiple tensors or path (Choose 1 option)
+### Load multiple tensors or multiple path (Choose 1 option)
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
     thermo_model=thermo_model, 
-    x=tensors,         # Option 1: tensors is a list of tensor
+    x=tensors,         # Option 1: tensors is a list of tensor --> exclude_cls & exclude_eos must be None
     in_path=[
         "embedding_1.pt", # Option 2: a list of input embedding file
         "embedding_2.pt", 
         "embedding_3.pt", 
         "embedding_4.pt", 
     ], 
-    cleave=[0, 0, 0, 0], # Option 2: 
+    cleave=[0, 0, 0, 0], # Option 2
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=[True, True, True, True], # Option 2: 
-    exclude_eos=[True, True, True, True], # Option 2: 
+    exclude_cls=[True, True, True, True], # Option 2
+    exclude_eos=[True, True, True, True], # Option 2
 )
 ```
 

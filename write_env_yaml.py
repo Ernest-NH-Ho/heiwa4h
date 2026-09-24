@@ -28,7 +28,7 @@ def build_environment(name: str, torch_version: str, cuda_version: str) -> str:
         "  - conda-forge",
         "  - defaults",
         "  - bioconda",
-        "  - Ernest-NH-Ho",
+        # "  - Ernest-NH-Ho",
         "",
         "dependencies:",
         "  - python",
@@ -63,7 +63,7 @@ def build_environment(name: str, torch_version: str, cuda_version: str) -> str:
 
     lines.extend([
         "      - esm==3.2.1",
-        "      - heiwa==0.1.0",
+        "      - heiwa==0.1.1",
     ])
 
     return "\n".join(lines) + "\n"
