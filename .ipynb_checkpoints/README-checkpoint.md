@@ -20,24 +20,21 @@ from esm.models.esm3 import ESM3
 hw_setting = heiwa.Hardware_Setting(
     cpu=16, 
     batch_size=16, 
-    gpu_rs=12345, 
-    device = "cpu" # or "cuda"
+    gpu_rs=12345, # only triggered by gen_embed, de_novo, or predict functions
+    load_device = "cpu", 
+    run_device = "cuda",
 )
 
 
 # ===== Load models  =====
-# Use model.to(device) for esm3
 esm3_model = ESM3.from_pretrained(
     model_name="esm3_sm_open_v1", 
     device=torch.device("cuda")
 )
 
 heiwa_model, heiwa_orthogonalizer = heiwa.load_solv_encoder(hw_setting) # 
-heiwa_orthogonalizer.move_to("cuda")
-heiwa_model.move_to("cuda") 
 
 thermo_model = heiwa.load_thermo(hw_setting)
-thermo_model.move_to("cuda")
 
 
 # ===== Generation commands (Only accept 1 file per run) =====

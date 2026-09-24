@@ -63,7 +63,7 @@ def build_environment(name: str, torch_version: str, cuda_version: str) -> str:
 
     lines.extend([
         "      - esm==3.2.1",
-        "      - heiwa==0.1.1",
+        "      - heiwa==0.1.2",
     ])
 
     return "\n".join(lines) + "\n"
