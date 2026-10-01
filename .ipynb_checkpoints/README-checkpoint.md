@@ -12,7 +12,7 @@ WARNING: heiwa does modify the esm3 script. We recommend a separate environment.
 
 2. Python implementation
 ```python
-import heiwa
+import heiwa  # This modifies the backend of ESM3. If the 1st run after installation pops an error, just run again.
 import torch
 from esm.models.esm3 import ESM3
 
@@ -32,13 +32,20 @@ esm3_model = ESM3.from_pretrained(
     device=torch.device("cuda")
 )
 
-heiwa_model, heiwa_orthogonalizer = heiwa.load_solv_encoder(hw_setting) # 
+heiwa_model, heiwa_orthogonalizer = heiwa.load_solv_encoder(hw_setting)
 
 thermo_model = heiwa.load_thermo(hw_setting)
 
 
 # ===== Generation commands (Only accept 1 file per run) =====
-heiwa.gen_embed(esm3_model=esm3_model, hw_setting=hw_setting, inFile="a_single_protein.pdb", outPath="./a_single_protein.pt")
+heiwa.gen_embed(
+    hw_setting=hw_setting, 
+    esm3_model=esm3_model, 
+    cleave=0,
+    inFile="a_single_protein.pdb", # option 1 for input
+    protein=an_esm3_protein_object, # option 2 for input
+    outPath="./a_single_protein.pt"
+)
 heiwa.de_novo(
     hw_setting=hw_setting, 
     esm3_model=esm3_model,
@@ -48,7 +55,8 @@ heiwa.de_novo(
     seq_prompt=seq_prompt, # Option 1 for prompt (choose one option only)
     crit_resi = (45, 59, 61, 64, 66, 69, 93, 187), # Option 2 for prompt
     idx_style=1, # Option 2 only (0 or 1)
-    inFile="a_single_protein.cif", 
+    inFile="a_single_protein.cif", # option 1 for input
+    protein=an_esm3_protein_object, # option 2 for input
     outPath="a_single_protein", 
 )
 
