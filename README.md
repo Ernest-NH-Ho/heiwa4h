@@ -66,35 +66,42 @@ heiwa.de_novo(
 )
 
 # ===== Predict thermophilicity of a protein ====
-### Load 1 tensor or 1 path
+### Load 1 protein file
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
+    esm3_model=esm3_model, 
     thermo_model=thermo_model, 
-    x=tensor, # Input option 1: directly load a tensor
-    in_path,  # Input option 2: give the directory
+    in_path="protein_1.pdb",  
+    emb_path="protein_1/protein_1.pt", # If the pt already exists, the programme will directly load the embedding file
+    cleave=0, 
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=False, # Input option 2
-    exclude_eos=False, # Input option 2
+    exclude_cls=True, 
+    exclude_eos=True, 
 )
 
-### Load multiple tensors or multiple path (Choose 1 option)
+### Load multiple protein path
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
+    esm3_model=esm3_model, 
     thermo_model=thermo_model, 
-    x=tensors,             # Input option 1: tensors is a list of tensor
     in_path=[
-        "embedding_1.pt",  # Input option 2: a list of input embedding file
-        "embedding_2.pt", 
-        "embedding_3.pt", 
-        "embedding_4.pt", 
+        "protein_1.pdb",  
+        "protein_2.cif", 
+        "protein_3.dssp", 
     ], 
+    emb_path=[
+        "protein_1/protein_1.pt", 
+        "protein_2/protein_2.pt", 
+        "protein_3/protein_3.pt", 
+    ], 
+    cleave=[0, 0, 19], 
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=[True, True, True, True],  # Input option 2
-    exclude_eos=[True, True, True, True],  # Input option 2
+    exclude_cls=[True, True, True], 
+    exclude_eos=[True, True, True], 
 )
 ```
 

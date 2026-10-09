@@ -1,6 +1,11 @@
 ## Project Introduction
 Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding the protein language model ESM3 (https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1), resulting in improved forcefield understanding and higher stability in generated proteins. 
 
+
+## Citations
+tbc
+
+
 ## For Easy Implementation of HEIWA
 1. Conda environment
 ```bash
@@ -42,8 +47,8 @@ heiwa.gen_embed(
     hw_setting=hw_setting, 
     esm3_model=esm3_model, 
     cleave=0,
-    inFile="a_single_protein.pdb", # option 1 for input
-    protein=an_esm3_protein_object, # option 2 for input
+    inFile="a_single_protein.pdb", # Input option 1
+    protein=a_esm3_protein_object, # Input option 2
     outPath="./a_single_protein.pt"
 )
 heiwa.de_novo(
@@ -52,46 +57,51 @@ heiwa.de_novo(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
     cleave=0, # for signal peptide
-    seq_prompt=seq_prompt, # Option 1 for prompt (choose one option only)
-    crit_resi = (45, 59, 61, 64, 66, 69, 93, 187), # Option 2 for prompt
+    seq_prompt=seq_prompt,                         # Prompt option 1 (choose one option only)
+    crit_resi = (45, 59, 61, 64, 66, 69, 93, 187), # Prompt option 2
     idx_style=1, # Option 2 only (0 or 1)
-    inFile="a_single_protein.cif", # option 1 for input
-    protein=an_esm3_protein_object, # option 2 for input
+    inFile="a_single_protein.cif", # Input option 1 (choose one option only)
+    protein=a_esm3_protein_object, # Input option 2
     outPath="a_single_protein", 
 )
 
 # ===== Predict thermophilicity of a protein ====
-### Load 1 tensor or 1 path
+### Load 1 protein file
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
+    esm3_model=esm3_model, 
     thermo_model=thermo_model, 
-    x=tensor, # Option 1: directly load a tensor --> exclude_cls & exclude_eos must be None
-    in_path,  # Option 2: give the directory
-    cleave,   # Option 2
+    in_path="protein_1.pdb",  
+    emb_path="protein_1/protein_1.pt", # If the pt already exists, the programme will directly load the embedding file
+    cleave=0, 
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=False, # Option 2
-    exclude_eos=False, # Option 2
+    exclude_cls=True, 
+    exclude_eos=True, 
 )
 
-### Load multiple tensors or multiple path (Choose 1 option)
+### Load multiple protein path
 heiwa.predict(
     heiwa_model=heiwa_model, 
     heiwa_orthogonalizer=heiwa_orthogonalizer, 
+    esm3_model=esm3_model, 
     thermo_model=thermo_model, 
-    x=tensors,         # Option 1: tensors is a list of tensor --> exclude_cls & exclude_eos must be None
     in_path=[
-        "embedding_1.pt", # Option 2: a list of input embedding file
-        "embedding_2.pt", 
-        "embedding_3.pt", 
-        "embedding_4.pt", 
+        "protein_1.pdb",  
+        "protein_2.cif", 
+        "protein_3.dssp", 
     ], 
-    cleave=[0, 0, 0, 0], # Option 2
+    emb_path=[
+        "protein_1/protein_1.pt", 
+        "protein_2/protein_2.pt", 
+        "protein_3/protein_3.pt", 
+    ], 
+    cleave=[0, 0, 19], 
     out_folder=".", 
     hw_setting=hw_setting, 
-    exclude_cls=[True, True, True, True], # Option 2
-    exclude_eos=[True, True, True, True], # Option 2
+    exclude_cls=[True, True, True], 
+    exclude_eos=[True, True, True], 
 )
 ```
 
@@ -119,5 +129,4 @@ Please consult the ```README.md``` inside each folder.
 ## Version History & Documentation
 https://pypi.org/project/heiwa/
 
-## Citations
-tbc
+
