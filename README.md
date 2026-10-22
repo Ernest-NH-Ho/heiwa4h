@@ -3,10 +3,10 @@ Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding t
 
 
 ## Citations
-tbc
+Ho, N.H.E., Ng, I.S. and Chang, J.S., 2026. One-shot Evaluation of Protein Mutability and Epistasis Score Using Structure-Based Model ESM3. Journal of the Taiwan Institute of Chemical Engineers, 179, p.106413. 10.1016/j.jtice.2025.106413.
 
 
-## For Easy Implementation of HEIWA
+## Python Implementation
 1. Conda environment
 ```bash
 python write_env_yaml.py --name <name_of_env> --torch <my_version> --cuda <depends_on_your_gpu>
@@ -129,4 +129,5 @@ Please consult the ```README.md``` inside each folder.
 ## Version History & Documentation
 https://pypi.org/project/heiwa/
 
-
+## Contact
+hoernesta@gmail.com
