@@ -3,7 +3,7 @@ Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding t
 
 
 ## Citations
-Ho, N.H.E., Ng, I.S. and Chang, J.S., 2026. One-shot Evaluation of Protein Mutability and Epistasis Score Using Structure-Based Model ESM3. Journal of the Taiwan Institute of Chemical Engineers, 179, p.106413. 10.1016/j.jtice.2025.106413.
+Ho, N.H.E., Ng, I.S. and Chang, J.S., 2026. One-shot Evaluation of Protein Mutability and Epistasis Score Using Structure-Based Model ESM3. Journal of Chemical Information and Modeling. 10.1021/acs.jcim.6c01844.
 
 
 ## Python Implementation
