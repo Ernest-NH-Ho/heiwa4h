@@ -7,6 +7,7 @@ Ho, N.H.E., Yang, C.T., Ng, I.S. and Chang, J.S., 2026. HEIWA: Hybrid Explicitâˆ
 
 
 ## Python Implementation
+
 1. Conda environment
 ```bash
 python write_env_yaml.py --name <name_of_env> --torch <my_version> --cuda <depends_on_your_gpu>
@@ -107,6 +108,7 @@ heiwa.predict(
 
 Notes:
 - Input files can be pdb, cif, dssp
+- Source code for heiwa package: https://github.com/Ernest-NH-Ho/heiwa_package
 
 ## For reviewers and whoever pursuing manual inspection
 This is three-in-one repo that provide the my source code for
