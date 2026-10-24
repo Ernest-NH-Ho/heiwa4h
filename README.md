@@ -3,7 +3,7 @@ Hybrid Explicit-Implicit Water Attention (HEIWA) adds aqueous solvent encoding t
 
 
 ## Citations
-Ho, N.H.E., Ng, I.S. and Chang, J.S., 2026. One-shot Evaluation of Protein Mutability and Epistasis Score Using Structure-Based Model ESM3. Journal of Chemical Information and Modeling. 10.1021/acs.jcim.6c01844.
+Ho, N.H.E., Yang, C.T., Ng, I.S. and Chang, J.S., 2026. HEIWA: Hybrid Explicit−Implicit Water Attention Affects Force Field Accuracy in Structure-Based Protein Language Model ESM3. Journal of Chemical Information and Modeling. 10.1021/acs.jcim.6c01844.
 
 
 ## Python Implementation
