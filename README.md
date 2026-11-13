@@ -131,5 +131,8 @@ Please consult the ```README.md``` inside each folder.
 ## Version History & Documentation
 https://pypi.org/project/heiwa/
 
+## License
+heiwa4h is licensed under the [MIT License](LICENSE).
+
 ## Contact
 hoernesta@gmail.com
